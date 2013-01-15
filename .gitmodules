@@ -31,3 +31,6 @@
 [submodule "bundle/snipmate"]
 	path = bundle/snipmate
 	url = https://github.com/msanders/snipmate.vim.git
+[submodule "bundle/wombat256"]
+	path = bundle/wombat256
+	url = https://github.com/vim-scripts/wombat256.vim.git
