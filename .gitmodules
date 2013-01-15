@@ -22,3 +22,12 @@
 [submodule "bundle/l9"]
 	path = bundle/l9
 	url = https://github.com/vim-scripts/L9.git
+[submodule "bundle/colorsamplerpack"]
+	path = bundle/colorsamplerpack
+	url = https://github.com/vim-scripts/Color-Sampler-Pack.git
+[submodule "bundle/tcomment"]
+	path = bundle/tcomment
+	url = https://github.com/vim-scripts/tComment.git
+[submodule "bundle/snipmate"]
+	path = bundle/snipmate
+	url = https://github.com/msanders/snipmate.vim.git
