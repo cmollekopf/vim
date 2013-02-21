@@ -30,7 +30,7 @@ highlight Pmenu ctermfg=1 ctermbg=4 guibg=grey30
 " se autoindent
 set undofile
 set undodir=~/.vim/undodir
-set undolevels=1000 "maximum number of changes that can be undone
+set undolevels=1000  "maximum number of changes that can be undone
 set undoreload=10000 "maximum number lines to save for undo on a buffer reload
 
 " allow backspacing over everything in insert mode (same as bs=2)
@@ -48,22 +48,36 @@ set wrapscan    " wrap searches
 set incsearch   " do incremental searching
 set ignorecase  " ignore case while searching
 set smartcase   " don't ignore case while searching when typing upper case
+set smarttab    " insert tabs on the start of a line according to shiftwidth, not tabstop
+set tabstop=4     " a tab is four spaces
+set shiftwidth=4  " number of spaces to use for autoindenting
+set shiftround    " use multiple of shiftwidth when indenting with '<' and'>'
+        
 set number
-set directory=~/.vim/backup,/tmp    " use this directory for backup files (*~)
+set directory=~/.vim/backup,/tmp    " use this directory for swap files (*~)
+set backupdir=~/.vim/backup,/tmp    " use this directory for backup files (*~)
 "use spellcheck (english by default)
 "set spell 
-set wildignore=.svn,CVS,.git,.hg,*.o,*.a,*.class,*.mo,*.la,*.so,*.obj,*.swp,*.jpg,*.png,*.xpm,*.gif,.DS_Store,*.aux,*.out,*.toc,tmp,*.scssc
+set hidden " hide instead of closing buffers, so we can switch without saving and undo lists remain
+set wildignore=CMakeFiles,*~,.svn,CVS,.git,.hg,*.o,*.a,*.class,*.mo,*.la,*.so,*.obj,*.swp,*.jpg,*.png,*.xpm,*.gif,.DS_Store,*.aux,*.out,*.toc,tmp,*.scssc
 set wildmenu
 set wildmode=list:longest,full
 if executable('/bin/zsh')
     set shell=/bin/zsh\ -l
 endif
 
+" Set leader key
+let mapleader = ","
+
 " clear search matching
 noremap <leader><space> :noh<cr>:call clearmatches()<cr>
 
+" Quickly edit/reload the vimrc file
+nmap <silent> <leader>ev :e $MYVIMRC<CR>
+nmap <silent> <leader>sv :so $MYVIMRC<CR>
+
 " Don't use Ex mode, use Q for formatting
-map Q gq
+"map Q gq
 
 " Don't loose selection while indenting
 vnoremap < <gv
@@ -79,7 +93,20 @@ nnoremap <C-Q> :bd<CR>
 
 nnoremap <F1> :NERDTreeToggle <CR>  
 nnoremap <F2> :FufFile <CR>
+nnoremap <F4> :TlistToggle <CR>
 nnoremap <F5> :GundoToggle<CR>
+
+" syntax check Bash script
+map <leader>cb :!bash -n %<cr>
+
+" build tags of your own project with Ctrl-F11
+nnoremap <F11> :!ctags -R --sort=yes --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
+
+" use :w!! if you forgot to sudo open a file
+cmap w!! w !sudo tee % >/dev/null
+
+"fix commant-t abort
+let g:CommandTCancelMap=['<ESC>','<C-c>']
 
 " In many terminal emulators the mouse works just fine, thus enable it.
 " if has('mouse')
@@ -131,6 +158,8 @@ endif
 " == Plugin Settings ==
 " === Nerdtree  ===
 let NERDTreeShowHidden=1
+" === Taglist ===
+let Tlist_WinWidth = 50
 
 
 " == C++ Environment ==
@@ -166,11 +195,6 @@ function! SetupCPPenviron()
     set path+=/usr/include/c++/**
     
     " === Tags ===
-    "
-    " If I ever need to generate tags on the fly, I uncomment this:
-    " noremap <C-F11> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
-    " build tags of your own project with Ctrl-F11
-    nnoremap <F11> :!ctags -R --sort=yes --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
     " configure tags - add additional tags here or comment out not-used ones
     set tags+=/usr/include/tags
     "set tags+=~/.vim/tags/cpp
