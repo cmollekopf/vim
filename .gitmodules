@@ -7,9 +7,9 @@
 [submodule "bundle/nerdtree"]
 	path = bundle/nerdtree
 	url = https://github.com/scrooloose/nerdtree.git
-[submodule "bundle/clang_complete"]
-	path = bundle/clang_complete
-	url = https://github.com/Rip-Rip/clang_complete.git
+; [submodule "bundle/clang_complete"]
+; 	path = bundle/clang_complete
+; 	url = https://github.com/Rip-Rip/clang_complete.git
 [submodule "bundle/fuzzyfinder"]
 	path = bundle/fuzzyfinder
 	url = https://github.com/vim-scripts/FuzzyFinder.git
@@ -61,3 +61,45 @@
 [submodule "bundle/lustyjuggler"]
 	path = bundle/lustyjuggler
 	url = https://github.com/vim-scripts/LustyJuggler.git
+[submodule "bundle/textile"]
+	path = bundle/textile
+	url = https://github.com/vim-scripts/Textile-for-VIM.git
+[submodule "bundle/youcompleteme"]
+	path = bundle/youcompleteme
+	url = https://github.com/Valloric/YouCompleteMe.git
+[submodule "bundle/easymotion"]
+	path = bundle/easymotion
+	url = https://github.com/Lokaltog/vim-easymotion.git
+[submodule "bundle/gitgutter"]
+	path = bundle/gitgutter
+	url = git://github.com/airblade/vim-gitgutter.git
+[submodule "bundle/extradite"]
+	path = bundle/extradite
+	url = https://github.com/int3/vim-extradite.git
+[submodule "bundle/conque-gdb"]
+	path = bundle/conque-gdb
+	url = https://github.com/vim-scripts/Conque-GDB.git
+[submodule "bundle/gitv"]
+	path = bundle/gitv
+	url = https://github.com/gregsexton/gitv.git
+[submodule "bundle/camelcasemotion"]
+	path = bundle/camelcasemotion
+	url = https://github.com/vim-scripts/camelcasemotion.git
+[submodule "bundle/surround"]
+	path = bundle/surround
+	url = https://github.com/tpope/vim-surround
+[submodule "bundle/conque"]
+	path = bundle/conque
+	url = https://github.com/vim-scripts/Conque-Shell.git
+[submodule "bundle/dispatch"]
+	path = bundle/dispatch
+	url = git://github.com/tpope/vim-dispatch.git
+[submodule "bundle/abolish"]
+	path = bundle/abolish
+	url = git://github.com/tpope/vim-abolish.git
+[submodule "bundle/goyo"]
+	path = bundle/goyo
+	url = https://github.com/junegunn/goyo.vim.git
+[submodule "bundle/limelight"]
+	path = bundle/limelight
+	url = https://github.com/junegunn/limelight.vim.git

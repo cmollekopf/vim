@@ -1,13 +1,22 @@
-" When started as "evim", evim.vim will already have done these settings.
-if v:progname =~? "evim"
-  finish
-endif
+" To disable a plugin, add it's bundle name to the following list
+let g:pathogen_disabled = []
+call add(g:pathogen_disabled, 'minibufexpl')
+call add(g:pathogen_disabled, 'clangcomplete')
+call add(g:pathogen_disabled, 'fuzzyfinder')
+" call add(g:pathogen_disabled, 'youcompleteme')
+call add(g:pathogen_disabled, 'conque-gdb')
+" call add(g:pathogen_disabled, 'yankring')
+call add(g:pathogen_disabled, 'camelcasemotion')
+call add(g:pathogen_disabled, 'background-make')
+
 execute pathogen#infect()
 execute pathogen#helptags()
 
 " Use Vim settings, rather then Vi settings (much better!).
 " This must be first, because it changes other options as a side effect.
 set nocompatible
+
+set ttymouse=xterm  " so vim doesn't hang inside screen and tmux
 
 " == Visuals ==
 "set t_Co=256
@@ -25,6 +34,14 @@ if &t_Co > 2 || has("gui_running")
 endif
 
 highlight Pmenu ctermfg=1 ctermbg=4 guibg=grey30
+
+" == Powerline==
+set encoding=utf-8
+" set laststatus=0 "never show statusbar
+set laststatus=2 "always show statusbar
+" python from powerline.vim import setup as powerline_setup
+" python powerline_setup()
+" python del powerline_setup
 
 " == General ==
 " se autoindent
@@ -52,6 +69,7 @@ set smarttab    " insert tabs on the start of a line according to shiftwidth, no
 set tabstop=4     " a tab is four spaces
 set shiftwidth=4  " number of spaces to use for autoindenting
 set shiftround    " use multiple of shiftwidth when indenting with '<' and'>'
+set expandtab     " convert tabs to spaces
         
 set number
 set directory=~/.vim/backup,/tmp    " use this directory for swap files (*~)
@@ -66,33 +84,74 @@ if executable('/bin/zsh')
     set shell=/bin/zsh\ -l
 endif
 
+" Show trailing whitespace:
+match ErrorMsg '\s\+$'
+
 " Set leader key
 let mapleader = ","
 
 " clear search matching
 noremap <leader><space> :noh<cr>:call clearmatches()<cr>
 
+" Always search very magic (so we can do search1|search2)
+" :nnoremap / /\v
+" :cnoremap s/ s/\v
+
 " Quickly edit/reload the vimrc file
 nmap <silent> <leader>ev :e $MYVIMRC<CR>
 nmap <silent> <leader>sv :so $MYVIMRC<CR>
 
+" quit with leader q
+nmap <silent> <leader>q :qa<CR>
+
 " Don't use Ex mode, use Q for formatting
-"map Q gq
+map Q gq
+
+" Paste from yankregister instead of default to support repeated replace operations
+" vnoremap p "0p
 
 " Don't loose selection while indenting
 vnoremap < <gv
 vnoremap > >gv
 
+" allow the . to execute once for each line of a visual selection
+vnoremap . :normal .<CR>
+
 " CTRL-U in insert mode deletes a lot.  Use CTRL-G u to first break undo,
 " so that you can undo CTRL-U after inserting a line break.
 inoremap <C-U> <C-G>u<C-U>
 
+" moving in buffers
 nnoremap <C-L> :bn<CR>
 nnoremap <C-H> :bp<CR>
-nnoremap <C-Q> :bd<CR>
+nnoremap <C-x> :bd<CR>
+
+" increment and decrement with alt
+nnoremap <A-a> <C-a>
+nnoremap <A-x> <C-x>
+
+" camelcasemotion - replace default motions
+" map w <Plug>CamelCaseMotion_w
+" map b <Plug>CamelCaseMotion_b
+" map e <Plug>CamelCaseMotion_e
+" sunmap w
+" sunmap b
+" sunmap e
+
+" omap iw <Plug>CamelCaseMotion_iw
+" xmap iw <Plug>CamelCaseMotion_iw
+" omap ib <Plug>CamelCaseMotion_ib
+" xmap ib <Plug>CamelCaseMotion_ib
+" omap ie <Plug>CamelCaseMotion_ie
+" xmap ie <Plug>CamelCaseMotion_ie
+
+" yankring with alt
+"let g:yankring_replace_n_pkey = '<C-p>'
+"let g:yankring_replace_n_nkey = '<C-n>'
 
 nnoremap <F1> :NERDTreeToggle <CR>  
-nnoremap <F2> :FufFile <CR>
+" nnoremap <F2> :FufFile <CR>
+nnoremap <F3> :GitGutterToggle <CR>
 nnoremap <F4> :TlistToggle <CR>
 nnoremap <F5> :GundoToggle<CR>
 
@@ -140,6 +199,9 @@ if has("autocmd")
     \ endif
 
   augroup END
+
+  " Reset cursor to beginning for commit messages
+  au FileType gitcommit au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0])
 else
   set autoindent		" always set autoindenting on
 endif " has("autocmd")
@@ -154,6 +216,69 @@ if !exists(":DiffOrig")
 		  \ | wincmd p | diffthis
 endif
 
+if !exists(":Linebreak")
+  command Linebreak %s///g
+endif
+
+" Clean trailing whitespace
+if !exists(":Cleanspaces")
+  command Cleanspaces :%s/\s\+$//
+endif
+
+if !exists(":Converthtml")
+  command Converthtml :%s/&gt;/>/ge | %s/&lt;/</ge | %s/&amp;/&/ge | %s/&quot;/"/ge
+endif
+
+" function! DoCleanBrackets()
+"   " if a:visual
+"   "   normal! gv
+"   " endif
+"   '<,'>s/( /(/g | %s/ )/)/g
+" endfunction
+
+nnoremap ds<space> F<space>xf<space>x
+
+" Clean spaces in brackets
+if !exists(":Cleanbrackets")
+  command Cleanbrackets :%s/( /(/g | %s/ )/)/g
+  " command -range Cleanbrackets <line1>,<line2>call DoCleanBrackets()
+  " if a:visual
+  "   normal! gv
+  " endif
+  " command Cleanbrackets :'<,'>s/( /(/g | %s/ )/)/g
+endif
+
+" Paste clipboard
+if !exists(":Paste")
+  command Paste :read !xclip -selection clipboard -o
+endif
+
+if !exists(":Columnize")
+  command -range Columnize <line1>,<line2>!column -t
+endif
+
+if !exists(":SquashSpaces")
+  command -range SquashSpaces :<line1>,<line2>s/  */ /
+endif
+
+if !exists(":Ctest")
+  command -nargs=1 Ctest :!cb && ctest -R <f-args> -V && cs
+endif
+
+function! KDESrcBuild(project)
+  let project = a:project
+  compiler kdesrc
+  set errorformat^=%-G%f:%l:\ warning:%m
+  set makeprg="~/docker/testenv.py srcbuild install " . project
+  echo &makeprg
+  Make
+endfunction
+
+if !exists(":Kake")
+  command -nargs=1 Kake :call KDESrcBuild(<f-args>)
+endif
+
+" Dispatch ~/docker/testenv.py srcbuild install zanshin
 
 " == Plugin Settings ==
 " === Nerdtree  ===
@@ -161,25 +286,59 @@ let NERDTreeShowHidden=1
 " === Taglist ===
 let Tlist_WinWidth = 50
 
+" === YCM ===
+" Show function declaration in preview
+set completeopt+=preview
+nnoremap <leader>jd :YcmCompleter GoTo<CR>
+nnoremap <leader>gt :YcmCompleter GetType<CR>
+let g:ycm_key_list_select_completion = ['<Down>']
+let g:ycm_confirm_extra_conf = 0 "disable confirmation
+let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
+" let g:ycm_global_ycm_extra_conf = '~/kdebuild/.ycm_extra_conf.py'
 
 " == C++ Environment ==
 
 " https://github.com/Rip-Rip/clang_complete/issues/158
 " Don't move this to any function, it needs to be global
-let g:clang_use_library = 1
+" let g:clang_use_library = 1
 
 " Continuous compilation after every buffer save
-augroup c++
-    autocmd BufWritePost *.{hpp,cpp}
-        \ silent execute ":!make > ~/.vim/cpperrors 2>&1 &" |
-        \ redraw! |
-        \ cgetfile ~/.vim/cpperrors
-augroup END
+" augroup c++
+"     autocmd BufWritePost *.{hpp,cpp}
+"         \ silent execute ":!make > ~/.vim/cpperrors 2>&1 &" |
+"         \ redraw! |
+"         \ cgetfile ~/.vim/cpperrors
+" augroup END
+
+" fugitive filetype (doesn't seem to work)
+" au! BufNewFile,BufRead fugitive://* setf fugitive
+"
+let g:dispatch_compilers = {
+                \ 'kdesrc': 'kdesrc',
+                \ 'makeobj': 'makeobj'}
+
+compiler kdesrc
+set errorformat^=%-G%f:%l:\ warning:%m
+set makeprg=~/docker/testenv.py\ srcbuild\ install\ $*
+
+" CMake Parser
+" Call stack entries
+" let &efm = ' %#%f:%l %#(%m)'
+" " Start of multi-line error
+" let &efm .= ',%E' . 'CMake Error at %f:%l (message):'
+" " End of multi-line error
+" let &efm .= ',%Z' . 'Call Stack (most recent call first):'
+" " Continuation is message
+" let &efm .= ',%C' . ' %m'
+
+" cmake filetype
+au BufNewFile,BufRead CMakeLists.txt set filetype=cmake
 
 au BufNewFile,BufRead *.c,*.cc,*.cpp,*.h,*.hh,*.hpp call SetupCPPenviron()
 
 function! SetupCPPenviron()
-    set makeprg=/home/chrigi/devel/kde/kdemake
+    " set makeprg=/home/chrigi/devel/kde/kdemake
+    " set makeprg=makeobj
     " === CMake Output Parser ===
     " Call stack entries
     " let &efm = ' %#%f:%l %#(%m)'
@@ -192,11 +351,13 @@ function! SetupCPPenviron()
 
 
     " Search path for 'gf' command (e.g. open #include-d files)
-    set path+=/usr/include/c++/**
+    set path+=/usr/include/**
+    set path+=/opt/devel/master/include/**
+    " set path+=/usr/include/c++/**
     
     " === Tags ===
     " configure tags - add additional tags here or comment out not-used ones
-    set tags+=/usr/include/tags
+    " set tags+=/usr/include/tags
     "set tags+=~/.vim/tags/cpp
     "set tags+=~/.vim/tags/qt4
     "set tags+=~/.vim/tags/kde
@@ -207,7 +368,7 @@ function! SetupCPPenviron()
     " python initClangComplete(vim.eval('g:clang_complete_lib_flags'))
 
     " necessary for using libclang
-    let g:clang_library_path='/usr/lib/llvm'
+    " let g:clang_library_path='/usr/lib/llvm'
 
     " clang_complete Complete options (disable preview scratch window)
     "set completeopt=menu,menuone,longest
@@ -218,10 +379,10 @@ function! SetupCPPenviron()
     " let g:clang_complete_auto=0
 
     " Show clang errors in the quickfix window
-     let g:clang_complete_copen=1
+     " let g:clang_complete_copen=1
 
     " https://github.com/Rip-Rip/clang_complete/issues/10
-     let g:clang_user_options='|| exit 0'
+     " let g:clang_user_options='|| exit 0'
  
     " SuperTab option for context aware completion
     "let g:SuperTabDefaultCompletionType = "context"
