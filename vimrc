@@ -103,6 +103,8 @@ nmap <silent> <leader>sv :so $MYVIMRC<CR>
 
 " quit with leader q
 nmap <silent> <leader>q :qa<CR>
+" write with leader w
+nmap <silent> <leader>w :w<CR>
 
 " Don't use Ex mode, use Q for formatting
 map Q gq
