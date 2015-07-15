@@ -317,9 +317,6 @@ let g:dispatch_compilers = {
                 \ 'kdesrc': 'kdesrc',
                 \ 'makeobj': 'makeobj'}
 
-compiler kdesrc
-set errorformat^=%-G%f:%l:\ warning:%m
-set makeprg=~/docker/testenv.py\ srcbuild\ install\ $*
 
 " CMake Parser
 " Call stack entries
@@ -335,6 +332,8 @@ set makeprg=~/docker/testenv.py\ srcbuild\ install\ $*
 au BufNewFile,BufRead CMakeLists.txt set filetype=cmake
 
 au BufNewFile,BufRead *.c,*.cc,*.cpp,*.h,*.hh,*.hpp call SetupCPPenviron()
+
+autocmd BufRead,BufNewFile */kdebuild/* compiler kdesrc
 
 function! SetupCPPenviron()
     " set makeprg=/home/chrigi/devel/kde/kdemake

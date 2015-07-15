@@ -31,12 +31,17 @@ CompilerSet errorformat=
       \%X%*\\a:\ Leaving\ directory\ `%f',
       \%DMaking\ %*\\a\ in\ %f
 
+"Clang
+CompilerSet errorformat+=%f:%l:%c:\ %t%s:\ %m
+
+"
 " if exists('g:compiler_gcc_ignore_unmatched_lines')
 "   CompilerSet errorformat+=%-G%.%#
 " endif
 "
+" ignore warnings
 CompilerSet errorformat^=%-G%f:%l:\ warning:%m
-CompilerSet makeprg=~/docker/testenv.py\ srcbuild\ install\ $*
+CompilerSet makeprg=~/docker/testenv.py\ srcbuild\ $*
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
