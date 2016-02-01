@@ -103,3 +103,15 @@
 [submodule "bundle/limelight"]
 	path = bundle/limelight
 	url = https://github.com/junegunn/limelight.vim.git
+[submodule "bundle/cmdline-complete"]
+	path = bundle/cmdline-complete
+	url = https://github.com/vim-scripts/CmdlineComplete.git
+[submodule "bundle/rainbow_parantheses"]
+	path = bundle/rainbow_parantheses
+	url = https://github.com/kien/rainbow_parentheses.vim.git
+[submodule "bundle/ultisnips"]
+	path = bundle/zultisnips
+	url = https://github.com/sirver/ultisnips
+[submodule "bundle/vim-qml"]
+	path = bundle/vim-qml
+	url = https://github.com/peterhoeg/vim-qml.git

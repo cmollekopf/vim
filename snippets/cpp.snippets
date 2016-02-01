@@ -19,7 +19,7 @@ snippet elseif
 		${2}
 	} ${3}
 
-# Class
+# QClass
 snippet qclass
 	class ${1:`Filename('$1_t', 'name')`} : public QObject {
 		Q_OBJECT
@@ -29,6 +29,25 @@ snippet qclass
 
 	private:
 		${3:/* data */}
+	};
+
+# Class
+snippet class
+	class ${1} {
+	public:
+		$1();
+		~$1();
+	};
+
+# Derived
+snippet derived
+	class ${1} : public ${2} {
+	public:
+		$1(${3:arguments});
+		virtual ~$1();
+
+	private:
+		${4:/* data */}
 	};
 
 snippet connect
@@ -54,6 +73,9 @@ snippet gpl
 		02110-1301, USA.
 	*/
 
+snippet copyright
+	Copyright (c) `system("date +%Y")` Christian Mollekopf <mollekopf@kolabsys.com>
+
 snippet header
 	/*
 		Copyright (c) `system("date +%Y")` Christian Mollekopf <mollekopf@kolabsys.com>
@@ -77,3 +99,7 @@ snippet header
 	#define $1_H
 		${2/* content*/}
 	#endif
+
+snippet getset
+	void set${1}(const ${2} &$1);
+	$2 $1() const;

@@ -1,0 +1,79 @@
+priority -50
+
+extends c
+
+# We want to overwrite everything in parent ft.
+priority -49
+
+###########################################################################
+#                            TextMate Snippets                            #
+###########################################################################
+snippet beginend "$1.begin(), $1.end() (beginend)"
+${1:v}${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}begin(), $1${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}end()
+endsnippet
+
+snippet cl "class .. (class)"
+class ${1:`!p snip.rv = snip.basename or "name"`}
+{
+public:
+	${1/(\w+).*/$1/} (${2:arguments});
+	virtual ~${1/(\w+).*/$1/} ();
+
+private:
+	${0:/* data */}
+};
+endsnippet
+
+snippet ns "namespace .. (namespace)"
+namespace${1/.+/ /m}${1:`!p snip.rv = snip.basename or "name"`}
+{
+	${VISUAL}${0}
+}${1/.+/ \/* /m}$1${1/.+/ *\/ /m}
+endsnippet
+
+snippet pimpl "Private *p"
+class Private;
+Private *p;
+endsnippet
+
+# The python function lowercases the first letter of the first capture
+snippet getset "Setter and Getter"
+void set${1}(${2}`!p snip.rv=t[1][0:1].lower()+t[1][1:]`);
+${3} `!p snip.rv=t[1][0:1].lower()+t[1][1:]`() const;
+endsnippet
+
+snippet { "Braces"
+{
+	${1}
+}
+endsnippet
+
+snippet qtest "qtest"
+#include <QtTest>
+
+/**
+ * ${1}
+ */
+class ${2} : public QObject
+{
+    Q_OBJECT
+private Q_SLOTS:
+    void initTestCase()
+    {
+    }
+
+    void cleanup()
+    {
+    }
+
+    void init()
+    {
+    }
+
+    void test${3}()
+    {
+    }
+
+QTEST_MAIN(${2})
+#include "`!p snip.rv=snip.basename`.moc"
+endsnippet

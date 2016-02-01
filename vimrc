@@ -8,6 +8,7 @@ call add(g:pathogen_disabled, 'conque-gdb')
 " call add(g:pathogen_disabled, 'yankring')
 call add(g:pathogen_disabled, 'camelcasemotion')
 call add(g:pathogen_disabled, 'background-make')
+call add(g:pathogen_disabled, 'snipmate')
 
 execute pathogen#infect()
 execute pathogen#helptags()
@@ -21,9 +22,10 @@ set ttymouse=xterm  " so vim doesn't hang inside screen and tmux
 " == Visuals ==
 "set t_Co=256
 set background=dark
-"colorscheme pablo
 if &t_Co > 255 || has("gui_running")
-    colorscheme wombat256mod
+    " colorscheme wombat256mod
+    "colorscheme pablo
+    colorscheme xorium
 endif
 
 " Switch syntax highlighting on, when the terminal has colors
@@ -70,8 +72,7 @@ set tabstop=4     " a tab is four spaces
 set shiftwidth=4  " number of spaces to use for autoindenting
 set shiftround    " use multiple of shiftwidth when indenting with '<' and'>'
 set expandtab     " convert tabs to spaces
-        
-set number
+set relativenumber number
 set directory=~/.vim/backup,/tmp    " use this directory for swap files (*~)
 set backupdir=~/.vim/backup,/tmp    " use this directory for backup files (*~)
 "use spellcheck (english by default)
@@ -168,6 +169,9 @@ cmap w!! w !sudo tee % >/dev/null
 
 "fix commant-t abort
 let g:CommandTCancelMap=['<ESC>','<C-c>']
+
+"Esc with jk
+:imap jk <Esc>
 
 " In many terminal emulators the mouse works just fine, thus enable it.
 " if has('mouse')
@@ -296,7 +300,43 @@ nnoremap <leader>gt :YcmCompleter GetType<CR>
 let g:ycm_key_list_select_completion = ['<Down>']
 let g:ycm_confirm_extra_conf = 0 "disable confirmation
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
-" let g:ycm_global_ycm_extra_conf = '~/kdebuild/.ycm_extra_conf.py'
+
+" === Rainbow parantheses ===
+au VimEnter * RainbowParenthesesToggle
+au Syntax * RainbowParenthesesLoadRound
+au Syntax * RainbowParenthesesLoadSquare
+au Syntax * RainbowParenthesesLoadBraces
+au Syntax * RainbowParenthesesLoadChevrons
+
+let g:rbpt_colorpairs = [
+    \ ['brown',       'RoyalBlue3'],
+    \ ['Darkblue',    'SeaGreen3'],
+    \ ['darkgray',    'DarkOrchid3'],
+    \ ['darkgreen',   'firebrick3'],
+    \ ['darkcyan',    'RoyalBlue3'],
+    \ ['darkred',     'SeaGreen3'],
+    \ ['darkmagenta', 'DarkOrchid3'],
+    \ ['brown',       'firebrick3'],
+    \ ['gray',        'RoyalBlue3'],
+    \ ['white',       'SeaGreen3'],
+    \ ['darkmagenta', 'DarkOrchid3'],
+    \ ['Darkblue',    'firebrick3'],
+    \ ['darkgreen',   'RoyalBlue3'],
+    \ ['darkcyan',    'SeaGreen3'],
+    \ ['darkred',     'DarkOrchid3'],
+    \ ['red',         'firebrick3'],
+    \ ]
+let g:rbpt_max = 16
+let g:rbpt_loadcmd_toggle = 0
+
+" == Ultisnips ==
+" Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
+let g:UltiSnipsExpandTrigger="<c-j>"
+let g:UltiSnipsJumpForwardTrigger="<c-j>"
+let g:UltiSnipsJumpBackwardTrigger="<c-k>"
+
+" If you want :UltiSnipsEdit to split your window.
+let g:UltiSnipsEditSplit="vertical"
 
 " == C++ Environment ==
 
@@ -336,6 +376,8 @@ au BufNewFile,BufRead CMakeLists.txt set filetype=cmake
 au BufNewFile,BufRead *.c,*.cc,*.cpp,*.h,*.hh,*.hpp call SetupCPPenviron()
 
 autocmd BufRead,BufNewFile */kdebuild/* compiler kdesrc
+
+autocmd BufRead,BufNewFile *.md :Goyo
 
 function! SetupCPPenviron()
     " set makeprg=/home/chrigi/devel/kde/kdemake
