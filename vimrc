@@ -25,6 +25,7 @@ Plug 'sjl/gundo.vim'
 
 Plug 'vhdirk/vim-cmake', { 'for': 'cmake' }
 Plug 'codeindulgence/vim-tig'
+Plug 'kassio/neoterm'
 call plug#end()
 
 " Use Vim settings, rather then Vi settings (much better!).
