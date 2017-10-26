@@ -86,6 +86,7 @@ set expandtab     " convert tabs to spaces
 set relativenumber number
 set directory=~/.vim/backup,/tmp    " use this directory for swap files (*~)
 set backupdir=~/.vim/backup,/tmp    " use this directory for backup files (*~)
+set autoread " automatically reload unchanged buffers if the file changed
 "use spellcheck (english by default)
 "set spell 
 set hidden " hide instead of closing buffers, so we can switch without saving and undo lists remain
@@ -96,6 +97,7 @@ if executable('/bin/zsh')
     " set shell=/bin/zsh\ -l
     set shell=/bin/fish
     :tnoremap <Esc><Esc> <C-\><C-n>
+    :tnoremap <leader><leader> <C-\><C-n>
     :tnoremap <A-Esc> <Esc>
 
     :tnoremap <A-h> <C-\><C-n><C-w>h
@@ -107,6 +109,8 @@ if executable('/bin/zsh')
     :nnoremap <A-k> <C-w>k
     :nnoremap <A-l> <C-w>l
     let g:terminal_scrollback_buffer_size = 100000
+
+    ":tnoremap <leader>a <C-\><C-n>:Ttoggle<CR>
 endif
 
 " Show trailing whitespace:
@@ -135,11 +139,17 @@ nmap <silent> <leader>q :qa<CR>
 " write with leader w
 nmap <silent> <leader>w :w<CR>
 
+" toggle terminal
+nnoremap <silent> <leader>a :Ttoggle<CR><C-w>ja
+tnoremap <silent> <leader>a <C-\><C-n>:Ttoggle<CR>
+nmap <silent> <leader>m :T1 make -j5 install<CR>
+
 " Don't use Ex mode, use Q for formatting
 map Q gq
 
 " Paste from yankregister instead of default to support repeated replace operations
 " vnoremap p "0p
+vnoremap P "0p
 
 " Don't loose selection while indenting
 vnoremap < <gv
@@ -315,6 +325,8 @@ let g:ycm_key_list_select_completion = ['<Down>']
 let g:ycm_confirm_extra_conf = 0 "disable confirmation
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 
+" == Commentary ==
+autocmd FileType c,cpp,cs,java setlocal commentstring=//\ %s
 
 " == Deoplete ==
 " let g:deoplete#enable_at_startup = 1
