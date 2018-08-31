@@ -7,18 +7,20 @@ Plug 'neomake/neomake'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 
- Plug 'autozimu/LanguageClient-neovim', {
+Plug 'autozimu/LanguageClient-neovim', {
      \ 'branch': 'next',
      \ 'do': 'bash install.sh',
      \ }
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 
 Plug 'vim-airline/vim-airline'
+
 " Git integration
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
+Plug 'codeindulgence/vim-tig'
 
-Plug 'Tpope/vim-commentary'
+Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-surround'
@@ -30,7 +32,7 @@ Plug 'Lokaltog/vim-easymotion'
 Plug 'sjl/gundo.vim'
 
 Plug 'vhdirk/vim-cmake', { 'for': 'cmake' }
-Plug 'codeindulgence/vim-tig'
+
 Plug 'peterhoeg/vim-qml'
 Plug 'kassio/neoterm'
 Plug 'keith/investigate.vim'
@@ -38,6 +40,7 @@ Plug 'vim-ruby/vim-ruby'
 call plug#end()
 
 execute pathogen#infect()
+
 " Use Vim settings, rather then Vi settings (much better!).
 " This must be first, because it changes other options as a side effect.
 set nocompatible
@@ -340,20 +343,9 @@ let NERDTreeShowHidden=1
 " === Taglist ===
 let Tlist_WinWidth = 50
 
-" === YCM ===
-" Show function declaration in preview
-set completeopt+=preview
-
 " == Commentary ==
 autocmd FileType c,cpp,cs,java setlocal commentstring=//\ %s
 
-" == Deoplete ==
-" let g:deoplete#enable_at_startup = 1
-" inoremap <silent><expr> <Tab>
-"            \ pumvisible() ? "\<C-n>" : "<Tab>"
-"
-" let g:deoplete#sources#clang#libclang_path = "/usr/lib64/llvm/libclang.so"
-" let g:deoplete#sources#clang#clang_header ="/usr/include/clang/"
 
 " === Rainbow parantheses ===
 " au VimEnter * RainbowParenthesesToggle
@@ -387,7 +379,6 @@ autocmd FileType c,cpp,cs,java setlocal commentstring=//\ %s
 let g:ackprg = 'ag --nogroup --nocolor --column'
 
 " == Ultisnips ==
-" Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
 let g:UltiSnipsExpandTrigger="<c-j>"
 let g:UltiSnipsJumpForwardTrigger="<c-j>"
 let g:UltiSnipsJumpBackwardTrigger="<c-k>"
@@ -403,12 +394,11 @@ function! SrcbuildNeomake(...)
     let maker = {'exe': 'srcbuild', 'args': a:000, 'errorformat': '%E%f: line %l\, col %c\, %m'}
     call neomake#Make(0, [maker])
 endfunction
+
+command! -nargs=* Srcbuild call SrcbuildNeomake(<f-args>)
+
 " cmake filetype
 au BufNewFile,BufRead CMakeLists.txt set filetype=cmake
-
-
-" autocmd BufRead,BufNewFile *.md :Goyo
-" autocmd BufRead,BufNewFile *.c,*.cc,*.cpp,*.h,*.hh,*.hpp,CMakeLists.txt,*.py,*.qml  :Goyo!
 
 let g:deoplete#enable_at_startup = 1
 let g:deoplete#enable_refresh_always = 1
