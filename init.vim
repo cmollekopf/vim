@@ -1,0 +1,1 @@
+/home/mollekopf/.vim/vimrc
