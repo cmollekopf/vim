@@ -276,27 +276,20 @@ endif " has("autocmd")
 
 " Convenient command to see the difference between the current buffer and the
 " file it was loaded from, thus the changes you made.
-if !exists(":DiffOrig")
-  command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
+command! DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
 		  \ | wincmd p | diffthis
-endif
 
-if !exists(":Linebreak")
-  command Linebreak %s///g
-endif
+command! Linebreak %s///g
 
 " Clean trailing whitespace
-if !exists(":Cleanspaces")
-  command Cleanspaces :%s/\s\+$//
-endif
+command! Cleanspaces :%s/\s\+$//
 
-if !exists(":Converthtml")
-  command Converthtml :%s/&gt;/>/ge | %s/&lt;/</ge | %s/&amp;/&/ge | %s/&quot;/"/ge
-endif
+command! Converthtml :%s/&gt;/>/ge | %s/&lt;/</ge | %s/&amp;/&/ge | %s/&quot;/"/ge
 
-if !exists(":Escape")
-  command -range Escape <line1>,<line2>s/"/\\"/ge
-endif
+command! -range Escape <line1>,<line2>s/"/\\"/ge
+
+command! FormatXML :%!python3 -c "import xml.dom.minidom, sys; print(xml.dom.minidom.parse(sys.stdin).toprettyxml())"
+nnoremap = :FormatXML<Cr>
 
 " function! DoCleanBrackets()
 "   " if a:visual
@@ -318,22 +311,12 @@ if !exists(":Cleanbrackets")
 endif
 
 " Paste clipboard
-if !exists(":Paste")
-  command Paste :read !xclip -selection clipboard -o
-endif
+command! Paste :read !xclip -selection clipboard -o
 set clipboard=unnamedplus
 
-if !exists(":Columnize")
-  command -range Columnize <line1>,<line2>!column -t
-endif
+command! -range Columnize <line1>,<line2>!column -t
 
-if !exists(":SquashSpaces")
-  command -range SquashSpaces :<line1>,<line2>s/  */ /
-endif
-
-if !exists(":Ctest")
-  command -nargs=1 Ctest :!cb && ctest -R <f-args> -V && cs
-endif
+command! -range SquashSpaces :<line1>,<line2>s/  */ /
 
 " == Plugin Settings ==
 " === Nerdtree  ===
@@ -343,7 +326,7 @@ let NERDTreeShowHidden=1
 let Tlist_WinWidth = 50
 
 " == Commentary ==
-autocmd FileType c,cpp,cs,java setlocal commentstring=//\ %s
+autocmd FileType c,cpp,cs,java,qml setlocal commentstring=//\ %s
 
 
 " === Rainbow parantheses ===
@@ -410,3 +393,6 @@ let g:LanguageClient_serverCommands = {
 "nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
 nnoremap <leader>jd :call LanguageClient#textDocument_definition()<CR>
 nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
+" autocmd BufRead,BufNewFile *.md :Goyo
+" autocmd BufRead,BufNewFile *.c,*.cc,*.cpp,*.h,*.hh,*.hpp,CMakeLists.txt,*.py,*.qml  :Goyo!
+"
