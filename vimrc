@@ -1,14 +1,19 @@
 call plug#begin()
 Plug 'junegunn/goyo.vim', { 'for': 'markdown' }
-" Plug 'Shougo/deoplete.nvim'
-" Plug 'zchee/deoplete-clang'
 " Plug 'Shougo/neoinclude.vim'
+
+Plug 'neomake/neomake'
 
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 
-Plug 'Valloric/YouCompleteMe', { 'do': './install.py --clang-completer' }
+ Plug 'autozimu/LanguageClient-neovim', {
+     \ 'branch': 'next',
+     \ 'do': 'bash install.sh',
+     \ }
+Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 
+Plug 'vim-airline/vim-airline'
 " Git integration
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
@@ -17,6 +22,7 @@ Plug 'Tpope/vim-commentary'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-surround'
+Plug 'tpope/vim-dispatch'
 
 Plug 'vim-scripts/a.vim'
 Plug 'mileszs/ack.vim'
@@ -25,13 +31,23 @@ Plug 'sjl/gundo.vim'
 
 Plug 'vhdirk/vim-cmake', { 'for': 'cmake' }
 Plug 'codeindulgence/vim-tig'
+Plug 'peterhoeg/vim-qml'
 Plug 'kassio/neoterm'
+Plug 'keith/investigate.vim'
+Plug 'vim-ruby/vim-ruby'
 call plug#end()
 
+execute pathogen#infect()
 " Use Vim settings, rather then Vi settings (much better!).
 " This must be first, because it changes other options as a side effect.
 set nocompatible
 
+" let g:LanguageClient_serverCommands = {
+"     \ 'rust': ['rustup', 'run', 'nightly', 'rls'],
+"     \ 'javascript': ['javascript-typescript-stdio'],
+"     \ 'javascript.jsx': ['javascript-typescript-stdio'],
+"     \ 'cpp': ['clangd']
+"     \ }
 " == Visuals ==
 "set t_Co=256
 set background=dark
@@ -50,7 +66,6 @@ if &t_Co > 2 || has("gui_running")
 endif
 
 " == Powerline==
-set encoding=utf-8
 " set laststatus=0 "never show statusbar
 set laststatus=2 "always show statusbar
 " python from powerline.vim import setup as powerline_setup
@@ -124,6 +139,7 @@ let mapleader = ","
 noremap <leader><space> :noh<cr>:call clearmatches()<cr>
 
 " fzf
+let $FZF_DEFAULT_COMMAND = 'ag -g ""'
 noremap <leader>t :Files<cr>
 noremap <leader>b :Buffers<cr>
 
@@ -143,7 +159,7 @@ nmap <silent> <leader>w :w<CR>
 " toggle terminal
 nnoremap <silent> <leader>a :Ttoggle<CR><C-w>ja
 tnoremap <silent> <leader>a <C-\><C-n>:Ttoggle<CR>
-nmap <silent> <leader>m :T1 make -j5 install<CR>
+nmap <silent> <leader>m :T1 srcbuild make install<CR>
 
 " Don't use Ex mode, use Q for formatting
 map Q gq
@@ -221,6 +237,9 @@ endif
 " Automatically load doxyen syntax for c/c++ and a bunch other languages
 let g:load_doxygen_syntax=1
 
+" Investiage 
+let g:investigate_command_for_python = '/usr/bin/zeal ^s'
+
 " Only do this part when compiled with support for autocommands.
 if has("autocmd")
   " Enable file type detection.
@@ -273,6 +292,10 @@ if !exists(":Converthtml")
   command Converthtml :%s/&gt;/>/ge | %s/&lt;/</ge | %s/&amp;/&/ge | %s/&quot;/"/ge
 endif
 
+if !exists(":Escape")
+  command -range Escape <line1>,<line2>s/"/\\"/ge
+endif
+
 " function! DoCleanBrackets()
 "   " if a:visual
 "   "   normal! gv
@@ -320,11 +343,6 @@ let Tlist_WinWidth = 50
 " === YCM ===
 " Show function declaration in preview
 set completeopt+=preview
-nnoremap <leader>jd :YcmCompleter GoTo<CR>
-nnoremap <leader>gt :YcmCompleter GetType<CR>
-let g:ycm_key_list_select_completion = ['<Down>']
-let g:ycm_confirm_extra_conf = 0 "disable confirmation
-let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 
 " == Commentary ==
 autocmd FileType c,cpp,cs,java setlocal commentstring=//\ %s
@@ -381,11 +399,25 @@ let g:dispatch_compilers = {
                 \ 'kdesrc': 'kdesrc',
                 \ 'makeobj': 'makeobj'}
 
+function! SrcbuildNeomake(...)
+    let maker = {'exe': 'srcbuild', 'args': a:000, 'errorformat': '%E%f: line %l\, col %c\, %m'}
+    call neomake#Make(0, [maker])
+endfunction
 " cmake filetype
 au BufNewFile,BufRead CMakeLists.txt set filetype=cmake
 
-autocmd BufRead,BufNewFile */kdebuild/* compiler kdesrc
 
 " autocmd BufRead,BufNewFile *.md :Goyo
 " autocmd BufRead,BufNewFile *.c,*.cc,*.cpp,*.h,*.hh,*.hpp,CMakeLists.txt,*.py,*.qml  :Goyo!
 
+let g:deoplete#enable_at_startup = 1
+let g:deoplete#enable_refresh_always = 1
+let g:deoplete#auto_complete_delay = 10
+let g:LanguageClient_serverCommands = {
+    \ 'cpp': ['clangd'],
+    \ 'python': ['pyls'],
+    \ }
+
+"nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
+nnoremap <leader>jd :call LanguageClient#textDocument_definition()<CR>
+nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
