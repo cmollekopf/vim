@@ -39,7 +39,6 @@ Plug 'keith/investigate.vim'
 Plug 'vim-ruby/vim-ruby'
 call plug#end()
 
-execute pathogen#infect()
 
 " Use Vim settings, rather then Vi settings (much better!).
 " This must be first, because it changes other options as a side effect.
