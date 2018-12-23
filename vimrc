@@ -395,4 +395,6 @@ nnoremap <leader>jd :call LanguageClient#textDocument_definition()<CR>
 nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
 " autocmd BufRead,BufNewFile *.md :Goyo
 " autocmd BufRead,BufNewFile *.c,*.cc,*.cpp,*.h,*.hh,*.hpp,CMakeLists.txt,*.py,*.qml  :Goyo!
-"
+
+" fromstart is the slowest, but also always results in a correct result
+autocmd BufEnter * :syntax sync fromstart
