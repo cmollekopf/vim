@@ -12,6 +12,8 @@ Plug 'autozimu/LanguageClient-neovim', {
      \ 'do': 'bash install.sh',
      \ }
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+Plug 'phpactor/phpactor' ,  {'do': 'composer install', 'for': 'php'}
+Plug 'kristijanhusak/deoplete-phpactor'
 
 Plug 'vim-airline/vim-airline'
 
