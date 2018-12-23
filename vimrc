@@ -106,7 +106,13 @@ set directory=~/.vim/backup,/tmp    " use this directory for swap files (*~)
 set backupdir=~/.vim/backup,/tmp    " use this directory for backup files (*~)
 set autoread " automatically reload unchanged buffers if the file changed
 "use spellcheck (english by default)
-"set spell 
+set nospell
+set complete+=kspell
+map <silent> <leader>de :setlocal spell spelllang=de spelllang? <CR>
+map <silent> <leader>en :setlocal spell spelllang=en spelllang? <CR>
+map <silent> <leader>ns :setlocal nospell spelllang= spell? <CR>
+inoremap <silent> <C-s> <C-x><C-k>
+
 set hidden " hide instead of closing buffers, so we can switch without saving and undo lists remain
 set wildignore=CMakeFiles,*~,.svn,CVS,.git,.hg,*.o,*.a,*.class,*.mo,*.la,*.so,*.obj,*.swp,*.jpg,*.png,*.xpm,*.gif,.DS_Store,*.aux,*.out,*.toc,tmp,*.scssc
 set wildmenu
