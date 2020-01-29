@@ -104,8 +104,8 @@ set shiftwidth=4  " number of spaces to use for autoindenting
 set shiftround    " use multiple of shiftwidth when indenting with '<' and'>'
 set expandtab     " convert tabs to spaces
 set relativenumber number
-set directory=~/.vim/backup,/tmp    " use this directory for swap files (*~)
-set backupdir=~/.vim/backup,/tmp    " use this directory for backup files (*~)
+set directory=~/.cache/vim,/tmp    " use this directory for swap files (*~)
+set backupdir=~/.cache/vim,/tmp    " use this directory for backup files (*~)
 set autoread " automatically reload unchanged buffers if the file changed
 "use spellcheck (english by default)
 set nospell
