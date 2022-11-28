@@ -7,14 +7,20 @@ Plug 'neomake/neomake'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 " Plug 'junegunn/fzf.vim'
 Plug 'yuki-ycino/fzf-preview.vim'
+Plug 'dart-lang/dart-vim-plugin'
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/nvim-treesitter-refactor'
+Plug 'nvim-treesitter/nvim-treesitter-textobjects'
+" Configuration for most commonly used language servers
+" :LspInfo shows the status of active and configured language servers
+Plug 'neovim/nvim-lspconfig'
 
 Plug 'autozimu/LanguageClient-neovim', {
      \ 'branch': 'next',
      \ 'do': 'bash install.sh',
      \ }
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-Plug 'phpactor/phpactor' ,  {'do': 'composer install', 'for': 'php'}
-Plug 'kristijanhusak/deoplete-phpactor'
+
+Plug 'dense-analysis/ale'
 
 Plug 'vim-airline/vim-airline'
 
@@ -306,6 +312,9 @@ nnoremap = :FormatXML<Cr>
 "   " endif
 "   '<,'>s/( /(/g | %s/ )/)/g
 " endfunction
+"
+command! -range From64  :%!base64 --decode
+command! -range To64  :%!base64
 
 nnoremap ds<space> F<space>xf<space>x
 
@@ -399,18 +408,139 @@ let g:deoplete#auto_complete_delay = 10
 let g:LanguageClient_serverCommands = {
     \ 'cpp': ['clangd'],
     \ 'python': ['pyls'],
+    \ 'qml': ['qmllint'],
     \ }
+let g:LanguageClient_diagnosticsList = 'Disabled' " Disabled/Location
 
 "nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
 nnoremap <leader>jd :call LanguageClient#textDocument_definition()<CR>
 nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
 " autocmd BufRead,BufNewFile *.md :Goyo
 " autocmd BufRead,BufNewFile *.c,*.cc,*.cpp,*.h,*.hh,*.hpp,CMakeLists.txt,*.py,*.qml  :Goyo!
-
+"
 " fromstart is the slowest, but also always results in a correct result
 autocmd BufEnter * :syntax sync fromstart
 
 autocmd FileType php setlocal commentstring=\/\/\ %s
 
 
+set inccommand=split
 
+let g:ale_lint_on_enter = 0
+let g:ale_lint_on_save = 1
+let g:ale_linters = {
+ \   'javascript': ['eslint'],
+ \   'dart': ['language_server'],
+ \}
+
+" let g:syntastic_always_populate_loc_list = 1
+" let g:syntastic_auto_loc_list = 1
+" let g:syntastic_check_on_open = 1
+" let g:syntastic_check_on_wq = 0
+
+
+if has("nvim-0.5.0")
+	"nvim-treesitter configuration
+lua <<EOF
+require'nvim-treesitter.configs'.setup {
+  ensure_installed = "c", "cpp", "qmljs", "javascript", "sql", "make", "bash", "php", "vue", "json",     -- one of "all", "language", or a list of languages
+  highlight = {
+	enable = true,              -- false will disable the whole extension
+	disable = {},  -- list of language that will be disabled
+  },
+  refactor = {
+    highlight_definitions = { enable = true },
+	highlight_current_scope = { enable = false },
+    smart_rename = {
+      enable = true,
+      keymaps = {
+        smart_rename = "grr",
+      },
+    },
+    navigation = {
+      enable = true,
+      keymaps = {
+        goto_definition = "gnd",
+        list_definitions = "gnD",
+        list_definitions_toc = "gO",
+        goto_next_usage = "<a-*>",
+        goto_previous_usage = "<a-#>",
+      },
+    },
+  },
+  textobjects = {
+    -- possible text objects:
+    -- @block.inner
+    -- @block.outer
+    -- @call.inner
+    -- @call.outer
+    -- @class.inner
+    -- @class.outer
+    -- @comment.outer
+    -- @conditional.inner
+    -- @conditional.outer
+    -- @function.inner
+    -- @function.outer
+    -- @loop.inner
+    -- @loop.outer
+    -- @parameter.inner
+    -- @statement.outer
+	select = {
+	  enable = true,
+	  keymaps = {
+		["af"] = "@function.outer",
+		["if"] = "@function.inner",
+		["ac"] = "@class.outer",
+		["ic"] = "@class.inner",
+		},
+	  },
+	move = {
+	  enable = true,
+	  goto_next_start = {
+		["]m"] = "@function.outer",
+		["]]"] = "@class.outer",
+	  },
+	  goto_next_end = {
+		["]M"] = "@function.outer",
+		["]["] = "@class.outer",
+	  },
+	  goto_previous_start = {
+		["[m"] = "@function.outer",
+		["[["] = "@class.outer",
+	  },
+	  goto_previous_end = {
+		["[M"] = "@function.outer",
+		["[]"] = "@class.outer",
+	  },
+	},
+	swap = {
+	  enable = true,
+	  swap_next = {
+		["<leader>a"] = "@parameter.inner",
+	  },
+	  swap_previous = {
+		["<leader>A"] = "@parameter.inner",
+	  },
+	},
+  },
+  indent = {
+    enable = true,
+  },
+  incremental_selection = {
+    enable = true,
+    keymaps = {
+      init_selection = '<CR>',
+      scope_incremental = '<CR>',
+      node_incremental = '<TAB>',
+      node_decremental = '<S-TAB>',
+    },
+  },
+}
+EOF
+end
+
+" LSP config
+lua << EOF
+local lspconfig = require'lspconfig'
+lspconfig.clangd.setup{}
+EOF
