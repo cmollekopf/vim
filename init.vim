@@ -3,10 +3,16 @@ Plug 'junegunn/goyo.vim', { 'for': 'markdown' }
 " Plug 'Shougo/neoinclude.vim'
 
 Plug 'neomake/neomake'
+Plug 'tanvirtin/monokai.nvim'
+Plug 'folke/lsp-colors.nvim', { 'branch': 'main' }
 
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-" Plug 'junegunn/fzf.vim'
-Plug 'yuki-ycino/fzf-preview.vim'
+" Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+" Plug 'yuki-yano/fzf-preview.vim', { 'branch': 'release/rpc' }
+" Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+" Plug 'yuki-yano/fzf-preview.vim', { 'branch': 'release/remote', 'do': ':UpdateRemotePlugins' }
+
+Plug 'srstevenson/vim-picker'
+
 Plug 'dart-lang/dart-vim-plugin'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'nvim-treesitter/nvim-treesitter-refactor'
@@ -43,7 +49,6 @@ Plug 'sjl/gundo.vim'
 Plug 'vhdirk/vim-cmake', { 'for': 'cmake' }
 
 Plug 'peterhoeg/vim-qml'
-Plug 'kassio/neoterm'
 Plug 'keith/investigate.vim'
 Plug 'vim-ruby/vim-ruby'
 call plug#end()
@@ -60,7 +65,7 @@ if &t_Co > 255 || has("gui_running")
     " colorscheme wombat256mod
     "colorscheme pablo
     " colorscheme xorium
-    colorscheme monokai
+    colorscheme monokai_soda
 endif
 
 " Switch syntax highlighting on, when the terminal has colors
@@ -153,12 +158,27 @@ noremap <leader><space> :noh<cr>:call clearmatches()<cr>
 
 " fzf
 " let $FZF_DEFAULT_COMMAND = 'ag -g ""'
-let g:fzf_preview_filelist_command = 'ag -g ""'
-let g:fzf_preview_command = 'bat --color=always --style=grid {-1}'
-" noremap <leader>t :Files<cr>
-noremap <leader>t :FzfPreviewProjectFiles<cr>
-noremap <leader>b :FzfPreviewBuffers<cr>
+" let g:fzf_preview_filelist_command = 'ag -g ""'
+" let g:fzf_preview_command = 'bat --color=always --style=grid {-1}'
+" " noremap <leader>t :Files<cr>
+" noremap <leader>t :FzfPreviewProjectFiles<cr>
+" noremap <leader>b :FzfPreviewBuffers<cr>
 " noremap <leader>b :Buffers<cr>
+
+
+let g:picker_find_executable = 'rg'
+let g:picker_find_flags = '-S --color never --files'
+
+nmap <unique> <nowait> <leader>t <Plug>(PickerEdit)
+nmap <unique> <nowait> <leader>b <Plug>(PickerBuffer)
+" nmap <unique> <leader>ps <Plug>(PickerSplit)
+" nmap <unique> <leader>pt <Plug>(PickerTabedit)
+" nmap <unique> <leader>pv <Plug>(PickerVsplit)
+" nmap <unique> <leader>pb <Plug>(PickerBuffer)
+" nmap <unique> <leader>p] <Plug>(PickerTag)
+" nmap <unique> <leader>pw <Plug>(PickerStag)
+" nmap <unique> <leader>po <Plug>(PickerBufferTag)
+" nmap <unique> <leader>ph <Plug>(PickerHelp)
 
 " Always search very magic (so we can do search1|search2)
 " :nnoremap / /\v
@@ -299,6 +319,9 @@ command! Linebreak %s///g
 " Clean trailing whitespace
 command! Cleanspaces :%s/\s\+$//
 
+" NBSP looks like a space but isn't. Use :show list to see them.
+command! Cleannobreakspaces :%s/\%ua0/ /
+
 command! Converthtml :%s/&gt;/>/ge | %s/&lt;/</ge | %s/&amp;/&/ge | %s/&quot;/"/ge
 
 command! -range Escape <line1>,<line2>s/"/\\"/ge
@@ -329,7 +352,8 @@ if !exists(":Cleanbrackets")
 endif
 
 " Paste clipboard
-set clipboard=unnamedplus
+set clipboard+=unnamedplus
+
 
 command! -range Columnize <line1>,<line2>!column -t
 
@@ -405,11 +429,11 @@ let g:deoplete#enable_at_startup = 1
 let g:deoplete#enable_refresh_always = 1
 let g:deoplete#auto_complete_delay = 10
 " let g:LanguageClient_serverStderr = '/tmp/clangd.stderr'
-let g:LanguageClient_serverCommands = {
-    \ 'cpp': ['clangd'],
-    \ 'python': ['pyls'],
-    \ 'qml': ['qmllint'],
-    \ }
+" let g:LanguageClient_serverCommands = {
+"     \ 'cpp': ['clangd'],
+"     \ 'python': ['pyls'],
+"     \ 'qml': ['qmllint'],
+"     \ }
 let g:LanguageClient_diagnosticsList = 'Disabled' " Disabled/Location
 
 "nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
@@ -426,7 +450,7 @@ autocmd FileType php setlocal commentstring=\/\/\ %s
 
 set inccommand=split
 
-let g:ale_lint_on_enter = 0
+let g:ale_lint_on_enter = 1
 let g:ale_lint_on_save = 1
 let g:ale_linters = {
  \   'javascript': ['eslint'],
@@ -446,6 +470,7 @@ require'nvim-treesitter.configs'.setup {
   ensure_installed = "c", "cpp", "qmljs", "javascript", "sql", "make", "bash", "php", "vue", "json",     -- one of "all", "language", or a list of languages
   highlight = {
 	enable = true,              -- false will disable the whole extension
+    additional_vim_regex_highlighting = { "php" },
 	disable = {},  -- list of language that will be disabled
   },
   refactor = {
@@ -537,10 +562,17 @@ require'nvim-treesitter.configs'.setup {
   },
 }
 EOF
-end
 
 " LSP config
 lua << EOF
 local lspconfig = require'lspconfig'
-lspconfig.clangd.setup{}
+-- lspconfig.clangd.setup{}
+lspconfig.intelephense.setup {
+    flags = {
+        debounce_text_changes = 150,
+    },
+}
+lspconfig.dartls.setup{}
 EOF
+
+end
