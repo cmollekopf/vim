@@ -11,12 +11,16 @@ Plug 'folke/lsp-colors.nvim', { 'branch': 'main' }
 " Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 " Plug 'yuki-yano/fzf-preview.vim', { 'branch': 'release/remote', 'do': ':UpdateRemotePlugins' }
 
-Plug 'srstevenson/vim-picker'
+"Plug 'srstevenson/vim-picker'
+
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
+
+Plug 'nvim-tree/nvim-tree.lua'
+Plug 'nvim-tree/nvim-web-devicons'
 
 Plug 'dart-lang/dart-vim-plugin'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-Plug 'nvim-treesitter/nvim-treesitter-refactor'
-Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 " Configuration for most commonly used language servers
 " :LspInfo shows the status of active and configured language servers
 Plug 'neovim/nvim-lspconfig'
@@ -27,6 +31,8 @@ Plug 'autozimu/LanguageClient-neovim', {
      \ }
 
 Plug 'dense-analysis/ale'
+Plug 'wellle/tmux-complete.vim'
+Plug 'mfussenegger/nvim-lint'
 
 Plug 'vim-airline/vim-airline'
 
@@ -156,29 +162,10 @@ let mapleader = ","
 " clear search matching
 noremap <leader><space> :noh<cr>:call clearmatches()<cr>
 
-" fzf
-" let $FZF_DEFAULT_COMMAND = 'ag -g ""'
-" let g:fzf_preview_filelist_command = 'ag -g ""'
-" let g:fzf_preview_command = 'bat --color=always --style=grid {-1}'
-" " noremap <leader>t :Files<cr>
-" noremap <leader>t :FzfPreviewProjectFiles<cr>
-" noremap <leader>b :FzfPreviewBuffers<cr>
-" noremap <leader>b :Buffers<cr>
-
-
-let g:picker_find_executable = 'rg'
-let g:picker_find_flags = '-S --color never --files'
-
-nmap <unique> <nowait> <leader>t <Plug>(PickerEdit)
-nmap <unique> <nowait> <leader>b <Plug>(PickerBuffer)
-" nmap <unique> <leader>ps <Plug>(PickerSplit)
-" nmap <unique> <leader>pt <Plug>(PickerTabedit)
-" nmap <unique> <leader>pv <Plug>(PickerVsplit)
-" nmap <unique> <leader>pb <Plug>(PickerBuffer)
-" nmap <unique> <leader>p] <Plug>(PickerTag)
-" nmap <unique> <leader>pw <Plug>(PickerStag)
-" nmap <unique> <leader>po <Plug>(PickerBufferTag)
-" nmap <unique> <leader>ph <Plug>(PickerHelp)
+" Telescope mappings
+nmap <unique> <nowait> <leader>t <cmd>Telescope find_files<cr>
+nmap <unique> <nowait> <leader>b <cmd>Telescope buffers<cr>
+nmap <unique> <nowait> <leader>g <cmd>Telescope live_grep<cr>
 
 " Always search very magic (so we can do search1|search2)
 " :nnoremap / /\v
@@ -329,6 +316,9 @@ command! -range Escape <line1>,<line2>s/"/\\"/ge
 command! FormatXML :%!python3 -c "import xml.dom.minidom, sys; print(xml.dom.minidom.parse(sys.stdin).toprettyxml())"
 nnoremap = :FormatXML<Cr>
 
+command! FormatJSON :%!jq"
+nnoremap = :FormatJSON<Cr>
+
 " function! DoCleanBrackets()
 "   " if a:visual
 "   "   normal! gv
@@ -366,6 +356,9 @@ let g:clipboard = {
         \   },
         \   'cache_enabled': 1,
         \ }
+
+" Disable recording
+map q <Nop>
 
 command! -range Columnize <line1>,<line2>!column -t
 
@@ -411,7 +404,8 @@ autocmd FileType c,cpp,cs,java,qml setlocal commentstring=//\ %s
 " let g:rbpt_loadcmd_toggle = 0
 
 " == Ack/Ag ==
-let g:ackprg = 'ag --nogroup --nocolor --column'
+" let g:ackprg = 'ag --nogroup --nocolor --column'
+let g:ackprg = 'eg'
 
 " == Ultisnips ==
 let g:UltiSnipsExpandTrigger="<c-j>"
@@ -451,6 +445,7 @@ let g:LanguageClient_diagnosticsList = 'Disabled' " Disabled/Location
 "nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
 nnoremap <leader>jd :call LanguageClient#textDocument_definition()<CR>
 nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
+nnoremap <leader>fn :let @+ = expand("%:p")<CR>
 " autocmd BufRead,BufNewFile *.md :Goyo
 " autocmd BufRead,BufNewFile *.c,*.cc,*.cpp,*.h,*.hh,*.hpp,CMakeLists.txt,*.py,*.qml  :Goyo!
 "
@@ -462,12 +457,27 @@ autocmd FileType php setlocal commentstring=\/\/\ %s
 
 set inccommand=split
 
-let g:ale_lint_on_enter = 1
+let g:ale_lint_on_enter = 0
 let g:ale_lint_on_save = 1
 let g:ale_linters = {
  \   'javascript': ['eslint'],
  \   'dart': ['language_server'],
+ \   'python': ['flake8'],
  \}
+  " Enabled Linters: ['flake8', 'mypy', 'pylint', 'pyright', 'ruff']
+
+" Disable ale on large files because it's sloooooow
+lua <<EOF
+    vim.api.nvim_create_autocmd("BufEnter", {
+        group = vim.api.nvim_create_augroup("IndentBlanklineBigFile", {}),
+        pattern = "*",
+        callback = function()
+            if vim.api.nvim_buf_line_count(0) > 1000 then
+                vim.g.ale_enabled = false
+            end
+        end,
+    })
+EOF
 
 " let g:syntastic_always_populate_loc_list = 1
 " let g:syntastic_auto_loc_list = 1
@@ -476,6 +486,21 @@ let g:ale_linters = {
 
 
 if has("nvim-0.5.0")
+
+au BufWritePost * lua require('lint').try_lint()
+
+lua <<EOF
+require('lint').linters_by_ft = {
+  markdown = {'vale',}
+}
+
+vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+  callback = function()
+    require("lint").try_lint()
+  end,
+})
+EOF
+
 	"nvim-treesitter configuration
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
@@ -483,7 +508,14 @@ require'nvim-treesitter.configs'.setup {
   highlight = {
 	enable = true,              -- false will disable the whole extension
     additional_vim_regex_highlighting = { "php" },
-	disable = {},  -- list of language that will be disabled
+    disable = function(lang, buf) -- Disable in large C++ buffers
+        --return (lang == "cpp" or lang == "c") and (vim.api.nvim_buf_line_count(buf) > 5000)
+        local max_filesize = 100 * 1024 -- 100 KB
+        local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+        if ok and stats and stats.size > max_filesize then
+            return true
+        end
+    end,
   },
   refactor = {
     highlight_definitions = { enable = true },
@@ -579,12 +611,85 @@ EOF
 lua << EOF
 local lspconfig = require'lspconfig'
 -- lspconfig.clangd.setup{}
-lspconfig.intelephense.setup {
-    flags = {
-        debounce_text_changes = 150,
-    },
-}
+--lspconfig.intelephense.setup {
+--  flags = {
+--    debounce_text_changes = 150,
+--  },
+--  -- settings = {
+--  --   intelephense = {
+--  --     diagnostics = {
+--  --         undefinedFunctions = false,
+--  --         undefinedTypes = false
+--  --     }
+--  --   }
+--  -- },
+--}
 lspconfig.dartls.setup{}
+EOF
+
+
+lua << EOF
+-- disable netrw at the very start of your init.lua
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- optionally enable 24-bit colour
+vim.opt.termguicolors = true
+
+-- empty setup using defaults
+require("nvim-tree").setup()
+
+-- OR setup with some options
+require("nvim-tree").setup({
+  sort = {
+    sorter = "case_sensitive",
+  },
+  view = {
+    width = 30,
+  },
+  renderer = {
+    group_empty = true,
+  },
+  filters = {
+    dotfiles = true,
+  },
+})
+
+EOF
+
+	"telescope configuration
+lua <<EOF
+require('telescope').setup{
+  defaults = {
+    -- Default configuration for telescope goes here:
+    -- config_key = value,
+    mappings = {
+      i = {
+        -- map actions.which_key to <C-h> (default: <C-/>)
+        -- actions.which_key shows the mappings for your picker,
+        -- e.g. git_{create, delete, ...}_branch for the git_branches picker
+        ["<C-t>"] = "which_key"
+      }
+    }
+  },
+  pickers = {
+    -- Default configuration for builtin pickers goes here:
+    -- picker_name = {
+    --   picker_config_key = value,
+    --   ...
+    -- }
+    -- Now the picker_config_key will be applied every time you call this
+    -- builtin picker
+  },
+  extensions = {
+    -- Your extension configuration goes here:
+    -- extension_name = {
+    --   extension_config_key = value,
+    -- }
+    -- please take a look at the readme of the extension you want to configure
+  }
+}
+
 EOF
 
 end
