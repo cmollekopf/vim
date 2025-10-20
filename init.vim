@@ -20,15 +20,10 @@ Plug 'nvim-tree/nvim-tree.lua'
 Plug 'nvim-tree/nvim-web-devicons'
 
 Plug 'dart-lang/dart-vim-plugin'
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate', 'tag': 'v0.10.0'}
 " Configuration for most commonly used language servers
 " :LspInfo shows the status of active and configured language servers
 Plug 'neovim/nvim-lspconfig'
-
-Plug 'autozimu/LanguageClient-neovim', {
-     \ 'branch': 'next',
-     \ 'do': 'bash install.sh',
-     \ }
 
 Plug 'dense-analysis/ale'
 Plug 'wellle/tmux-complete.vim'
@@ -329,6 +324,9 @@ nnoremap = :FormatJSON<Cr>
 command! -range From64  :%!base64 --decode
 command! -range To64  :%!base64
 
+
+command! CreatePath :!mkdir -p %:h
+
 nnoremap ds<space> F<space>xf<space>x
 
 " Clean spaces in brackets
@@ -510,6 +508,9 @@ require'nvim-treesitter.configs'.setup {
     additional_vim_regex_highlighting = { "php" },
     disable = function(lang, buf) -- Disable in large C++ buffers
         --return (lang == "cpp" or lang == "c") and (vim.api.nvim_buf_line_count(buf) > 5000)
+        if lang == "c" then
+            return true
+        end
         local max_filesize = 100 * 1024 -- 100 KB
         local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
         if ok and stats and stats.size > max_filesize then
@@ -607,24 +608,44 @@ require'nvim-treesitter.configs'.setup {
 }
 EOF
 
-" LSP config
+"" LSP config
 lua << EOF
-local lspconfig = require'lspconfig'
--- lspconfig.clangd.setup{}
---lspconfig.intelephense.setup {
---  flags = {
---    debounce_text_changes = 150,
---  },
---  -- settings = {
---  --   intelephense = {
---  --     diagnostics = {
---  --         undefinedFunctions = false,
---  --         undefinedTypes = false
---  --     }
---  --   }
---  -- },
---}
-lspconfig.dartls.setup{}
+vim.lsp.enable('bashls')
+vim.lsp.enable('marksman')
+vim.lsp.enable('cspell_ls')
+vim.lsp.config('cspell_ls', {
+      filetypes = {"go", "rust", "js", "ts", "html", "css", "json", "yaml", "markdown", "gitcommit"},
+    })
+vim.lsp.enable('phpactor')
+vim.lsp.config('phpactor', {
+        init_options = {
+            ["language_server_phpstan.enabled"] = false,
+            ["language_server_psalm.enabled"] = false,
+        }
+    })
+
+vim.diagnostic.config({
+  virtual_text = {
+    prefix = "●",  -- can be a string or a function
+    spacing = 2,
+  },
+  signs = true,         -- show signs in the gutter
+  underline = true,     -- underline problematic text
+  update_in_insert = false, -- don't update diagnostics while typing
+  severity_sort = true,     -- sort diagnostics by severity
+})
+
+local opts = { noremap=true, silent=true }
+
+local function quickfix()
+    vim.lsp.buf.code_action({
+        filter = function(a) return a.isPreferred end,
+        apply = true
+    })
+end
+
+vim.keymap.set('n', '<leader>qf', quickfix, opts)
+
 EOF
 
 
